@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using PaymentsMS.Core.Service;
 using Stripe;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using PaymentsMS.Core.DTOs;
 
 namespace PaymentsMS.Infrastructure.Gateways
 {
@@ -43,10 +45,31 @@ namespace PaymentsMS.Infrastructure.Gateways
         {
             var paymentMethodService = new PaymentMethodService();
             var paymentMethod = await paymentMethodService.DetachAsync(paymentMethodId);
-
-            // Optionally, you can add logic here to verify if the detachment was successful
-            // For now, we'll assume it's successful if no exception is thrown.
             return paymentMethod != null;
+        }
+
+        public async Task<List<PaymentMethodDto>> ListPaymentMethodsAsync(string customerId)
+        {
+            var service = new PaymentMethodService();
+            var options = new PaymentMethodListOptions
+            {
+                Customer = customerId,
+                Type = "card", 
+            };
+            StripeList<PaymentMethod> paymentMethods = await service.ListAsync(options);
+            var result = new List<PaymentMethodDto>();
+            foreach (var pm in paymentMethods.Data)
+            {
+                result.Add(new PaymentMethodDto
+                {
+                    Id = pm.Id,
+                    Brand = pm.Card.Brand,
+                    Last4 = pm.Card.Last4,
+                    ExpMonth = pm.Card.ExpMonth,
+                    ExpYear = pm.Card.ExpYear
+                });
+            }
+            return result;
         }
     }
 }

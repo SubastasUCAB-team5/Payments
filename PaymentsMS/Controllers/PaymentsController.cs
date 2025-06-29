@@ -3,6 +3,9 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PaymentsMS.Application.Commands;
 using System.Threading.Tasks;
+using PaymentsMS.Core.DTOs;
+using PaymentsMS.Application.Queries;
+
 
 namespace PaymentsMS.Controllers
 {
@@ -41,6 +44,14 @@ namespace PaymentsMS.Controllers
                 return Ok(new { message = "Payment method detached successfully." });
             }
             return BadRequest(new { message = "Failed to detach payment method." });
+        }
+
+        [HttpGet("payment-methods")]
+        public async Task<IActionResult> GetPaymentMethods([FromQuery] string customerId)
+        {
+            var query = new GetPaymentMethodsQuery { CustomerId = customerId };
+            var paymentMethods = await _mediator.Send(query);
+            return Ok(paymentMethods);
         }
     }
 }
