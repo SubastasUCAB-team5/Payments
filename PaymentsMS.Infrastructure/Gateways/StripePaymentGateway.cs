@@ -71,5 +71,19 @@ namespace PaymentsMS.Infrastructure.Gateways
             }
             return result;
         }
+
+        public async Task<bool> SetDefaultPaymentMethodAsync(string customerId, string paymentMethodId)
+        {
+            var customerService = new CustomerService();
+            var updateOptions = new CustomerUpdateOptions
+            {
+                InvoiceSettings = new CustomerInvoiceSettingsOptions
+                {
+                    DefaultPaymentMethod = paymentMethodId,
+                },
+            };
+            var customer = await customerService.UpdateAsync(customerId, updateOptions);
+            return customer != null && customer.InvoiceSettings?.DefaultPaymentMethod?.Id == paymentMethodId;
+        }
     }
 }
