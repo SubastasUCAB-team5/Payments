@@ -53,5 +53,16 @@ namespace PaymentsMS.Controllers
             var paymentMethods = await _mediator.Send(query);
             return Ok(paymentMethods);
         }
+
+        [HttpPut("default-payment-method")]
+        public async Task<IActionResult> SetDefaultPaymentMethod([FromBody] SetDefaultPaymentMethodCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(new { message = "Default payment method set successfully." });
+            }
+            return BadRequest(new { message = "Failed to set default payment method." });
+        }
     }
 }
