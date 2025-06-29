@@ -30,5 +30,17 @@ namespace PaymentsMS.Controllers
             var paymentMethodId = await _mediator.Send(command);
             return Ok(new { paymentMethodId });
         }
+
+        [HttpDelete("payment-method")]
+        public async Task<IActionResult> DeletePaymentMethod([FromQuery] string customerId, [FromQuery] string paymentMethodId)
+        {
+            var command = new DeletePaymentMethodCommand { CustomerId = customerId, PaymentMethodId = paymentMethodId };
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(new { message = "Payment method detached successfully." });
+            }
+            return BadRequest(new { message = "Failed to detach payment method." });
+        }
     }
 }

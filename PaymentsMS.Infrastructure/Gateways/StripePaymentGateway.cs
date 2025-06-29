@@ -38,5 +38,15 @@ namespace PaymentsMS.Infrastructure.Gateways
 
             return paymentMethod.Id;
         }
+
+        public async Task<bool> DetachPaymentMethodAsync(string customerId, string paymentMethodId)
+        {
+            var paymentMethodService = new PaymentMethodService();
+            var paymentMethod = await paymentMethodService.DetachAsync(paymentMethodId);
+
+            // Optionally, you can add logic here to verify if the detachment was successful
+            // For now, we'll assume it's successful if no exception is thrown.
+            return paymentMethod != null;
+        }
     }
 }

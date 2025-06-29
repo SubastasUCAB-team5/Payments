@@ -6,5 +6,6 @@ namespace PaymentsMS.Core.Service
     {
         Task<string> CreateCustomer(string email, string name);
         Task<string> AttachPaymentMethod(string customerId, string paymentMethodId);
+        Task<bool> DetachPaymentMethodAsync(string customerId, string paymentMethodId);
     }
 }
