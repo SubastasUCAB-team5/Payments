@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PaymentsMS.Application.Handlers.Commands
 {
-    public class ProcessPaymentCommandHandler : IRequestHandler<ProcessPaymentCommand, string>
+    public class ProcessPaymentCommandHandler : IRequestHandler<ProcessPaymentCommand, bool>
     {
         private readonly IPaymentGateway _paymentGateway;
 
@@ -15,9 +15,9 @@ namespace PaymentsMS.Application.Handlers.Commands
             _paymentGateway = paymentGateway;
         }
 
-        public async Task<string> Handle(ProcessPaymentCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(ProcessPaymentCommand request, CancellationToken cancellationToken)
         {
-            return await _paymentGateway.CreatePaymentIntent(request.CustomerId, request.Amount, request.Currency);
+            return await _paymentGateway.ProcessPayment(request.CustomerId, request.PaymentMethodId, request.Amount, request.Currency);
         }
     }
 }

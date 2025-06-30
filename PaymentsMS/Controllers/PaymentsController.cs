@@ -68,8 +68,12 @@ namespace PaymentsMS.Controllers
         [HttpPost("process-payment")]
         public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentCommand command)
         {
-            var clientSecret = await _mediator.Send(command);
-            return Ok(new { clientSecret });
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(new { message = "Payment processed successfully." });
+            }
+            return BadRequest(new { message = "Failed to process payment." });
         }
     }
 }
