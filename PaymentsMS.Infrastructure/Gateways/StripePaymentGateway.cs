@@ -85,5 +85,22 @@ namespace PaymentsMS.Infrastructure.Gateways
             var customer = await customerService.UpdateAsync(customerId, updateOptions);
             return customer != null && customer.InvoiceSettings?.DefaultPaymentMethod?.Id == paymentMethodId;
         }
+
+        public async Task<string> CreatePaymentIntent(string customerId, long amount, string currency)
+        {
+            var options = new PaymentIntentCreateOptions
+            {
+                Customer = customerId,
+                Amount = amount,
+                Currency = currency,
+                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                {
+                    Enabled = true,
+                },
+            };
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.CreateAsync(options);
+            return paymentIntent.ClientSecret;
+        }
     }
 }

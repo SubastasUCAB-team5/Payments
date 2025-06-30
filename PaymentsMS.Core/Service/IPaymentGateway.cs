@@ -11,5 +11,6 @@ namespace PaymentsMS.Core.Service
         Task<bool> DetachPaymentMethodAsync(string customerId, string paymentMethodId);
         Task<List<PaymentMethodDto>> ListPaymentMethodsAsync(string customerId);
         Task<bool> SetDefaultPaymentMethodAsync(string customerId, string paymentMethodId);
+        Task<string> CreatePaymentIntent(string customerId, long amount, string currency);
     }
 }

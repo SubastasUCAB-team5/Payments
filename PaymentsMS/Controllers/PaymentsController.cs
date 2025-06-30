@@ -64,5 +64,12 @@ namespace PaymentsMS.Controllers
             }
             return BadRequest(new { message = "Failed to set default payment method." });
         }
+
+        [HttpPost("process-payment")]
+        public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentCommand command)
+        {
+            var clientSecret = await _mediator.Send(command);
+            return Ok(new { clientSecret });
+        }
     }
 }
