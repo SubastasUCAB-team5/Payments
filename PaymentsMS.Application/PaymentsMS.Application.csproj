@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PaymentsMS.Core\PaymentsMS.Core.csproj" />
+    <ProjectReference Include="..\PaymentsMS.Domain\PaymentsMS.Domain.csproj" />
   </ItemGroup>
 
 </Project>

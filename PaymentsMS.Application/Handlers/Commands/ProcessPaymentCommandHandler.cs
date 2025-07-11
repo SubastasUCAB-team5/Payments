@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using System;
 
 
+using System;
+
 namespace PaymentsMS.Application.Handlers.Commands
 {
     public class ProcessPaymentCommandHandler : IRequestHandler<ProcessPaymentCommand, bool>

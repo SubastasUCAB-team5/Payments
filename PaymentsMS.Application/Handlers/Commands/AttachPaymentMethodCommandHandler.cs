@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
+using System;
+
 namespace PaymentsMS.Application.Handlers.Commands
 {
     public class AttachPaymentMethodCommandHandler : IRequestHandler<AttachPaymentMethodCommand, string>

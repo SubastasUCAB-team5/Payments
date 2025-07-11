@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using PaymentsMS.Core.DTOs;
 using Microsoft.Extensions.Logging;
 
+using System;
+
 namespace PaymentsMS.Application.Handlers.Queries
 {
     public class GetPaymentMethodsQueryHandler : IRequestHandler<GetPaymentMethodsQuery, List<PaymentsMS.Core.DTOs.PaymentMethodDto>>

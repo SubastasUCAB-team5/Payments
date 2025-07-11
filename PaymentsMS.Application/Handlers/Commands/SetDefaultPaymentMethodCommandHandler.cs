@@ -5,6 +5,8 @@ using PaymentsMS.Application.Commands;
 using System.Threading;
 using System.Threading.Tasks;
 
+using System;
+
 namespace PaymentsMS.Application.Handlers.Commands
 {
     public class SetDefaultPaymentMethodCommandHandler : IRequestHandler<SetDefaultPaymentMethodCommand, bool>

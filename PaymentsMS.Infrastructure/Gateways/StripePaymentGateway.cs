@@ -4,6 +4,7 @@ using Stripe;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using PaymentsMS.Core.DTOs;
+using PaymentsMS.Domain.Exceptions;
 
 namespace PaymentsMS.Infrastructure.Gateways
 {
@@ -13,25 +14,25 @@ namespace PaymentsMS.Infrastructure.Gateways
         {
             StripeConfiguration.ApiKey = configuration["Stripe:ApiKey"];
         }
-
-        /// <summary>
-        /// Crea un nuevo cliente en Stripe.
-        /// </summary>
-        /// <param name="email">El correo electrónico del cliente.</param>
-        /// <param name="name">El nombre del cliente.</param>
-        /// <returns>El ID del cliente de Stripe.</returns>
         public async Task<string> CreateCustomer(string email, string name)
         {
-            var customerOptions = new CustomerCreateOptions
+            try
             {
-                Email = email,
-                Name = name,
-            };
+                var customerOptions = new CustomerCreateOptions
+                {
+                    Email = email,
+                    Name = name,
+                };
 
-            var customerService = new CustomerService();
-            var customer = await customerService.CreateAsync(customerOptions);
+                var customerService = new CustomerService();
+                var customer = await customerService.CreateAsync(customerOptions);
 
-            return customer.Id;
+                return customer.Id;
+            }
+            catch (StripeException ex)
+            {
+                throw new PaymentException($"Error al crear el cliente en Stripe: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -42,15 +43,22 @@ namespace PaymentsMS.Infrastructure.Gateways
         /// <returns>El ID del método de pago adjuntado.</returns>
         public async Task<string> AttachPaymentMethod(string customerId, string paymentMethodId)
         {
-            var paymentMethodAttachOptions = new PaymentMethodAttachOptions
+            try
             {
-                Customer = customerId,
-            };
+                var paymentMethodAttachOptions = new PaymentMethodAttachOptions
+                {
+                    Customer = customerId,
+                };
 
-            var paymentMethodService = new PaymentMethodService();
-            var paymentMethod = await paymentMethodService.AttachAsync(paymentMethodId, paymentMethodAttachOptions);
+                var paymentMethodService = new PaymentMethodService();
+                var paymentMethod = await paymentMethodService.AttachAsync(paymentMethodId, paymentMethodAttachOptions);
 
-            return paymentMethod.Id;
+                return paymentMethod.Id;
+            }
+            catch (StripeException ex)
+            {
+                throw new PaymentException($"Error al adjuntar el método de pago {paymentMethodId} al cliente {customerId} en Stripe: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -61,9 +69,16 @@ namespace PaymentsMS.Infrastructure.Gateways
         /// <returns>True si la operación fue exitosa, de lo contrario, false.</returns>
         public async Task<bool> DetachPaymentMethodAsync(string customerId, string paymentMethodId)
         {
-            var paymentMethodService = new PaymentMethodService();
-            var paymentMethod = await paymentMethodService.DetachAsync(paymentMethodId);
-            return paymentMethod != null;
+            try
+            {
+                var paymentMethodService = new PaymentMethodService();
+                var paymentMethod = await paymentMethodService.DetachAsync(paymentMethodId);
+                return paymentMethod != null;
+            }
+            catch (StripeException ex)
+            {
+                throw new PaymentException($"Error al desvincular el método de pago {paymentMethodId} del cliente {customerId} en Stripe: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -73,26 +88,33 @@ namespace PaymentsMS.Infrastructure.Gateways
         /// <returns>Una lista de objetos PaymentMethodDto.</returns>
         public async Task<List<PaymentMethodDto>> ListPaymentMethodsAsync(string customerId)
         {
-            var service = new PaymentMethodService();
-            var options = new PaymentMethodListOptions
+            try
             {
-                Customer = customerId,
-                Type = "card", 
-            };
-            StripeList<PaymentMethod> paymentMethods = await service.ListAsync(options);
-            var result = new List<PaymentMethodDto>();
-            foreach (var pm in paymentMethods.Data)
-            {
-                result.Add(new PaymentMethodDto
+                var service = new PaymentMethodService();
+                var options = new PaymentMethodListOptions
                 {
-                    Id = pm.Id,
-                    Brand = pm.Card.Brand,
-                    Last4 = pm.Card.Last4,
-                    ExpMonth = pm.Card.ExpMonth,
-                    ExpYear = pm.Card.ExpYear
-                });
+                    Customer = customerId,
+                    Type = "card", 
+                };
+                StripeList<PaymentMethod> paymentMethods = await service.ListAsync(options);
+                var result = new List<PaymentMethodDto>();
+                foreach (var pm in paymentMethods.Data)
+                {
+                    result.Add(new PaymentMethodDto
+                    {
+                        Id = pm.Id,
+                        Brand = pm.Card.Brand,
+                        Last4 = pm.Card.Last4,
+                        ExpMonth = pm.Card.ExpMonth,
+                        ExpYear = pm.Card.ExpYear
+                    });
+                }
+                return result;
             }
-            return result;
+            catch (StripeException ex)
+            {
+                throw new PaymentException($"Error al listar los métodos de pago para el cliente {customerId} en Stripe: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -103,16 +125,23 @@ namespace PaymentsMS.Infrastructure.Gateways
         /// <returns>True si la operación fue exitosa, de lo contrario, false.</returns>
         public async Task<bool> SetDefaultPaymentMethodAsync(string customerId, string paymentMethodId)
         {
-            var customerService = new CustomerService();
-            var updateOptions = new CustomerUpdateOptions
+            try
             {
-                InvoiceSettings = new CustomerInvoiceSettingsOptions
+                var customerService = new CustomerService();
+                var updateOptions = new CustomerUpdateOptions
                 {
-                    DefaultPaymentMethod = paymentMethodId,
-                },
-            };
-            var customer = await customerService.UpdateAsync(customerId, updateOptions);
-            return customer != null && customer.InvoiceSettings?.DefaultPaymentMethod?.Id == paymentMethodId;
+                    InvoiceSettings = new CustomerInvoiceSettingsOptions
+                    {
+                        DefaultPaymentMethod = paymentMethodId,
+                    },
+                };
+                var customer = await customerService.UpdateAsync(customerId, updateOptions);
+                return customer != null && customer.InvoiceSettings?.DefaultPaymentMethod?.Id == paymentMethodId;
+            }
+            catch (StripeException ex)
+            {
+                throw new PaymentException($"Error al establecer el método de pago por defecto {paymentMethodId} para el cliente {customerId} en Stripe: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
