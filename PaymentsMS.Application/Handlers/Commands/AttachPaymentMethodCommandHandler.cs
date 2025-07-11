@@ -18,16 +18,24 @@ namespace PaymentsMS.Application.Handlers.Commands
             _logger = logger;
         }
 
-        public Task<string> Handle(AttachPaymentMethodCommand request, CancellationToken cancellationToken)
+        /// <summary>
+        /// Maneja el comando para adjuntar un método de pago a un cliente.
+        /// </summary>
+        /// <param name="request">El comando AttachPaymentMethodCommand.</param>
+        /// <param name="cancellationToken">Token de cancelación.</param>
+        /// <returns>El ID del método de pago adjuntado.</returns>
+        public async Task<string> Handle(AttachPaymentMethodCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                _logger.LogInformation("AttachPaymentMethodCommandHandler.Handle: Attach payment method to customer.");
-                return _paymentGateway.AttachPaymentMethod(request.CustomerId, request.PaymentMethodId);
+                _logger.LogInformation("AttachPaymentMethodCommandHandler: Iniciando el proceso para adjuntar el método de pago {PaymentMethodId} al cliente {CustomerId}.", request.PaymentMethodId, request.CustomerId);
+                var paymentMethodId = await _paymentGateway.AttachPaymentMethod(request.CustomerId, request.PaymentMethodId);
+                _logger.LogInformation("AttachPaymentMethodCommandHandler: Método de pago {PaymentMethodId} adjuntado exitosamente al cliente {CustomerId}.", paymentMethodId, request.CustomerId);
+                return paymentMethodId;
             }
             catch (Exception ex)
             {
-                _logger.LogError("AttachPaymentMethodCommandHandler.Handle: Attach payment method to customer failed.", ex);
+                _logger.LogError(ex, "AttachPaymentMethodCommandHandler: Fallo al adjuntar el método de pago {PaymentMethodId} al cliente {CustomerId}.", request.PaymentMethodId, request.CustomerId);
                 throw;
             }
         }   

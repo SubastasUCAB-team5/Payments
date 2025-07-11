@@ -20,16 +20,24 @@ namespace PaymentsMS.Application.Handlers.Queries
             _logger = logger;
         }
 
+        /// <summary>
+        /// Maneja la consulta para obtener los métodos de pago de un cliente.
+        /// </summary>
+        /// <param name="request">La consulta GetPaymentMethodsQuery.</param>
+        /// <param name="cancellationToken">Token de cancelación.</param>
+        /// <returns>Una lista de PaymentMethodDto.</returns>
         public async Task<List<PaymentMethodDto>> Handle(GetPaymentMethodsQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                _logger.LogInformation("GetPaymentMethodsQueryHandler.Handle: Get payment methods.");
-                return await _paymentGateway.ListPaymentMethodsAsync(request.CustomerId);
+                _logger.LogInformation("GetPaymentMethodsQueryHandler: Iniciando la obtención de métodos de pago para el cliente {CustomerId}.", request.CustomerId);
+                var paymentMethods = await _paymentGateway.ListPaymentMethodsAsync(request.CustomerId);
+                _logger.LogInformation("GetPaymentMethodsQueryHandler: Métodos de pago obtenidos exitosamente para el cliente {CustomerId}. Cantidad: {Count}.", request.CustomerId, paymentMethods?.Count ?? 0);
+                return paymentMethods ?? new List<PaymentMethodDto>();
             }
             catch (Exception ex)
             {
-                _logger.LogError("GetPaymentMethodsQueryHandler.Handle: Get payment methods failed.", ex);
+                _logger.LogError(ex, "GetPaymentMethodsQueryHandler: Fallo al obtener los métodos de pago para el cliente {CustomerId}.", request.CustomerId);
                 throw;
             }
         }
